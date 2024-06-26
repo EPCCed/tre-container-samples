@@ -1,0 +1,10 @@
+---
+misconfiguration:
+  check-bundle-repository: ghcr.io/aquasecurity/trivy-checks:0
+  scanners:
+    - dockerfile
+severity:
+  - MEDIUM
+  - HIGH
+  - CRITICAL
+exit-code: 1

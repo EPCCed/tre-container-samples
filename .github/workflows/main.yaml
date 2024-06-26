@@ -56,7 +56,7 @@ jobs:
                 - < Dockerfile
       - name: Build Docker image
         run: |
-          img="ghcr.io/${{ github.repository }}"
+          img="ghcr.io/$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')"
           version="$(grep _VERSION= Dockerfile | cut -d'"' -f2)"
           image_revision="$(grep _IMAGE_REVISION= Dockerfile | cut -d'"' -f2)"
           tag="${version}-${image_revision}"

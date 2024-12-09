@@ -7,6 +7,11 @@ Please note the terms of the included [MIT License](./LICENSE), particularly, `T
 ## Samples
 
 - [Python Generic](./python-generic)
+- [Julia](./julia)
+- [Postgres](./postgres)
+- [Quarto Jupyter](./quarto-jupyter)
+- [Quarto R](./quarto-r)
+- [Rocker](./rocker)
 
 ## Documentation
 

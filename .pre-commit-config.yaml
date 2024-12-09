@@ -1,0 +1,39 @@
+---
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: "v5.0.0"
+    hooks:
+      # General
+      - id: check-added-large-files
+      - id: check-case-conflict
+      - id: check-merge-conflict
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+      - id: trailing-whitespace
+  # General
+  - repo: meta
+    hooks:
+      - id: check-hooks-apply
+      - id: check-useless-excludes
+  - repo: https://github.com/codespell-project/codespell
+    rev: "v2.3.0"
+    hooks:
+      - id: codespell
+        args:
+          [
+            --ignore-words,
+            .meta/codespell-ignores,
+            --exclude-file,
+            .meta/codespell-excludes,
+            --ignore-regex,
+            '\Whttps?://\S*',
+          ]
+  - repo: https://github.com/rkm/pre-commit-nocommit
+    rev: "v1.0.0"
+    hooks:
+      - id: nocommit
+        exclude: |
+          (?x)^(
+              .pre-commit-config.yaml
+          )

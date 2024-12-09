@@ -30,10 +30,12 @@ jobs:
     strategy:
       matrix:
         app: ${{ fromJSON(needs.init.outputs.apps) }}
+    defaults:
+      run:
+        working-directory: ${{ matrix.app }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
       - name: Build Dockerfile
         run: |
-          cd ${{ matrix.app }}
           docker build .

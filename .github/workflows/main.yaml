@@ -11,8 +11,25 @@ defaults:
     shell: bash
 
 jobs:
+  init:
+    runs-on: ubuntu-24.04
+    outputs:
+      apps: ${{ steps.apps.outputs.apps }}
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+      - name: set app matrix
+        id: apps
+        run: |
+          set -euxo pipefail
+          apps=$(find . -name Dockerfile | xargs dirname | cut -d'/' -f2 | sort | jq -ncR '[inputs]')
+          echo "apps=$apps" >> "$GITHUB_OUTPUT"
   build:
     runs-on: ubuntu-24.04
+    needs: init
+    strategy:
+      matrix:
+        apps: ${{ fromJSON(needs.init.outputs.apps) }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4

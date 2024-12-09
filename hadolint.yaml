@@ -1,3 +1,0 @@
-ignored:
-  # Ignore "Pin versions in apt get install"
-  - DL3008

@@ -29,7 +29,11 @@ jobs:
     needs: init
     strategy:
       matrix:
-        apps: ${{ fromJSON(needs.init.outputs.apps) }}
+        app: ${{ fromJSON(needs.init.outputs.apps) }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+      - name: Build Dockerfile
+        run: |
+          cd ${{ matrix.app }}
+          docker build .

@@ -1,10 +1,13 @@
-FROM docker.io/rocker/rstudio:latest@sha256:ee7c4efa46f0b5d46e051393ef05f262aceb959463b15fc3648955965290d231
+FROM rocker/rstudio:latest@sha256:ee7c4efa46f0b5d46e051393ef05f262aceb959463b15fc3648955965290d231
 
-USER root
-RUN mkdir /safe_data /safe_outputs /scratch /root/src
+ARG R_VERSION="1.10.4"
+ARG ROCKER_IMAGE_REVISION="1"
 
-COPY ./src /root/src
+RUN mkdir /safe_data /safe_outputs /scratch /rstudio/src
+ 
+COPY ./src /rstudio/src
 
-WORKDIR /root/src
+WORKDIR /rstudio/src
 
+# Adding required packages
 RUN r install_packages.R

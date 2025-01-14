@@ -2,32 +2,30 @@
 
 ## Running
 
-This example shows how to set up basic postgres parameters, create/execute custom scripts to initialise a new database and run postgres.
+Please refer to the [documentation](https://github.com/docker-library/docs/blob/master/postgres/README.md) for more information on the available options.
 
-Create a directory to store the database files:
+This example shows how to set up basic postgres parameters, create/execute custom scripts to initialise a new database and run a database accessible by other applications on port 5432.
 
-```console
-mkdir /safe_data/<proj-id>/postgres
-sudo chown 10001:10001 /safe_data/<proj-id>/postgres
+This test ran successfully in the eidf147 environment using the following commands:
+
+```bash
+mkdir pgdata pgrun
+ces-run --opt-file opt_file ghcr.io/...
 ```
 
-Create an options file, `opts.txt`:
-
-```console
--v /safe_data/<proj-id>/postgres:/var/lib/postgresql/data
+The opt_file contains:
+```bash
+-v ./pgdata:/var/lib/postgresql 
+-v ./pgrun:/var/run/postgresql
 -p 5432:5432
+-e POSTGRES_PASSWORD=test
+``` 
+
+The directories `/var/lib/postgresql` and `/var/run/postgresql` need to be mounted to a local directory belonging to the host user. Inside the container, they will belong to the *postgres* user.
+
+The database can be accessed through localhost port 5432. This can be tested on a system where postgreSQL is enabled (for example eidf147) with the following:
+```
+psql -h localhost -p 5432 -U postgres
 ```
 
-Run with `ces-run`:
-
-```console
-ces-run --opt-file opts.txt ghcr.io/...
-```
-
-## Notes
-
-From the [docker-postgres](https://github.com/docker-library/docs/blob/master/postgres/README.md) documentation (`Arbitrary --user Notes` section), the user running postgres has to:
-1. Be the owner of `/var/lib/postgresql/data`
-2. Exist in `/etc/passwd`
-
-To persist the database using the postgres image, a host directory or volume needs a bind-mount into `/var/lib/postgres/data` in the container. For this to work, the host directory that we use for the bind mount has to be empty on the first run and owned by the user that initialises the database, hence the `chown 10001:10001` command in the example above.
+The password in this example is set through the environment variable POSTGRES_PASSWORD, which is the only strictly required variable for container operation.

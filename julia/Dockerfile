@@ -1,14 +1,15 @@
-FROM docker.io/julia:latest@sha256:32b91d5ff59276c5986b9b35b76b232651d71e8273dcf22ead1593a960ce816e
+FROM julia:latest@sha256:48c57c62ee9c56d11e4e4aea03dbeca89af22817232c074debe9941e44d749d3
 
-ENV JULIA_DEPOT_PATH=/home/ces-user/.julia
+ARG JULIA_VERSION="1.10.4"
+ARG JULIA_IMAGE_REVISION="1"
 
-USER root
-RUN mkdir /safe_data /safe_outputs /scratch
+RUN mkdir /safe_data /safe_outputs /scratch /test
 
-WORKDIR /app
+WORKDIR /test
 
 COPY --chmod=0755 src/* .
 
-RUN julia /app/install_packages.jl
+# Adding required packages
+RUN julia install_packages.jl 
 
-ENTRYPOINT ["/app/run_test.sh"]
+CMD ["/bin/bash", "run_test.sh"]

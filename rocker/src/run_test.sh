@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd /root/src
+cd /root/src 
 
 # Run example script
 r plot_example.R

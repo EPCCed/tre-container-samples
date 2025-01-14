@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" <<-EOSQL
-    CREATE ROLE "$CONTAINER_USER" NOSUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD '$CONTAINER_USER_PASSWORD';
-    CREATE DATABASE "$CONTAINER_USER_DB" OWNER "$CONTAINER_USER" ENCODING 'utf-8';
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL
+	CREATE USER test;
+	CREATE DATABASE test;
+	GRANT ALL PRIVILEGES ON DATABASE test TO test;
 EOSQL
 
 # can import a database from backup here using pg_restore

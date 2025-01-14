@@ -35,7 +35,7 @@ where `rocker-test` needs to be replaced with the actual container name.
 
 This makes use of the rocker built in environment variables RUNROOTLESS, PASSWORD, USERID and GROUPID to make sure that the container user rstudio is created with the permissions of the host user, and is therefore able to access and edit the TRE directories. 
 
-Note that the password can be changed or left out entirely. In this case, the container will generate a new password to use, which will be shown on the terminal.
+The password can be changed or left out entirely. If the latter is chosen, the container will generate a new password to use, which will be shown on the terminal.
 
 ## Notes
 

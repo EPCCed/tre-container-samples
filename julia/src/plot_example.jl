@@ -1,4 +1,6 @@
 using Plots
+# prevents figure from attempting to be displayed
+ENV["GKSwstype"]="nul"
 
 # plot some data
 plot([cumsum(rand(500) .- 0.5), cumsum(rand(500) .- 0.5)])

@@ -10,7 +10,7 @@ This test ran successfully in the eidf147 environment using the following comman
 
 ```bash
 mkdir pgdata pgrun
-ces-run --opt-file opt_file ghcr.io/...
+ces-dk-run --opt-file opt_file ghcr.io/...
 ```
 
 The opt_file contains:

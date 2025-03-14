@@ -10,6 +10,6 @@ WORKDIR /test
 COPY --chmod=0755 src/* .
 
 # Adding required packages
-RUN julia install_packages.jl 
+RUN julia install_packages.jl
 
 CMD ["/bin/bash", "run_test.sh"]

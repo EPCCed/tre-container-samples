@@ -10,7 +10,7 @@ RUN mkdir /safe_data /safe_outputs /scratch /src
 
 # Add R packages needed for code to run
 RUN /opt/conda/bin/R -e 'install.packages("palmerpenguins",repos = "http://cran.us.r-project.org")' \
-    && /opt/conda/bin/R -e 'install.packages("tidyverse",repos = "http://cran.us.r-project.org")' 
+    && /opt/conda/bin/R -e 'install.packages("tidyverse",repos = "http://cran.us.r-project.org")'
 
 # Copy test files
 WORKDIR /src

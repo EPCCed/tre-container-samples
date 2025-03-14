@@ -1,4 +1,4 @@
--v ./pgdata:/var/lib/postgresql 
+-v ./pgdata:/var/lib/postgresql
 -v ./pgrun:/var/run/postgresql
 -p 5432:5432
 -e POSTGRES_PASSWORD=test

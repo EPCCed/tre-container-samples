@@ -5,16 +5,18 @@ _WIP_
 This document outlines best practices for building and publishing software container images which are ready for the TRE Container Execution Service.
 
 We assume that you are already familiar with Docker concepts and have some experience in building your own images. If you are new to Docker, then the following resources would be a good starting point:
--   https://carpentries-incubator.github.io/docker-introduction/
--   https://docs.docker.com/get-started/overview/
--   https://docker-curriculum.com/
+
+- https://carpentries-incubator.github.io/docker-introduction/
+- https://docs.docker.com/get-started/overview/
+- https://docker-curriculum.com/
 
 It is also assumed that software development best practices are followed, such as version control using Git(Hub) and Continuous Integration (CI). It is also recommended to enable a tool such as [Dependabot](https://docs.github.com/en/code-security/getting-started/dependabot-quickstart-guide) to receive alerts and automated Pull Requests for dependencies.
 
 This guide is intended to provide an overview of building images appropriate for the TRE, and not a full end-to-end explanation for packaging existing analysis code into a container. A particular focus is placed on:
--   Optimising the build process to reduce the content of an image, the build time, and the final image size,
--   Ensuring common mistakes are highlighted through the use of code linting tools,
--   Automating the image publishing process using the GitHub Actions (GHA) CI service.
+
+- Optimising the build process to reduce the content of an image, the build time, and the final image size,
+- Ensuring common mistakes are highlighted through the use of code linting tools,
+- Automating the image publishing process using the GitHub Actions (GHA) CI service.
 
 ## Contents
 
@@ -33,95 +35,96 @@ This guide is intended to provide an overview of building images appropriate for
 ## 1. Writing a `Dockerfile`
 
 We have compiled a checklist for Dockerfile creation using these resources as a basis:
--   https://docs.docker.com/develop/develop-images/dockerfile_best-practices/
--   https://sysdig.com/blog/dockerfile-best-practices/
+
+- https://docs.docker.com/develop/develop-images/dockerfile_best-practices/
+- https://sysdig.com/blog/dockerfile-best-practices/
 
 ### 1.1. Checklist for writing `Dockerfile`s
 
--   [ ] Images in all `FROM` statements are fully-qualified and pinned
-    -   **Rationale**: Docker images can be hosted on multiple repositories, and image tags are mutable. The only way to ensure reproducible builds is by pinning images by their full signature. The signature of an image can be viewed with `docker inspect --format='{{index .RepoDigests 0}}' <image>`. The image repository is usually `docker.io` or `ghcr.io`.
-    -   **Example**:
-        ```dockerfile
-        # Incorrect
-        FROM nvidia/cuda:latest
-        FROM docker.io/nvidia/cuda:12.4.1-cudnn-devel-ubuntu22.04
-        FROM docker.io/nvidia/cuda:latest
+- [ ] Images in all `FROM` statements are fully-qualified and pinned
+  - **Rationale**: Docker images can be hosted on multiple repositories, and image tags are mutable. The only way to ensure reproducible builds is by pinning images by their full signature. The signature of an image can be viewed with `docker inspect --format='{{index .RepoDigests 0}}' <image>`. The image repository is usually `docker.io` or `ghcr.io`.
+  - **Example**:
+    ```dockerfile
+    # Incorrect
+    FROM nvidia/cuda:latest
+    FROM docker.io/nvidia/cuda:12.4.1-cudnn-devel-ubuntu22.04
+    FROM docker.io/nvidia/cuda:latest
 
-        # Correct
-        FROM docker.io/nvidia/cuda:12.4.1-cudnn-devel-ubuntu22.04@sha256:622e78a1d02c0f90ed900e3985d6c975d8e2dc9ee5e61643aed587dcf9129f42
-        ```
+    # Correct
+    FROM docker.io/nvidia/cuda:12.4.1-cudnn-devel-ubuntu22.04@sha256:622e78a1d02c0f90ed900e3985d6c975d8e2dc9ee5e61643aed587dcf9129f42
+    ```
 - [ ] Consecutive and related commands are grouped into a single `RUN` statement
-    - **Rationale**: Each `RUN` statement causes a new layer to be created in the image. By grouping `RUN` statements together, and deleting temporary files, the final image image size can be greatly reduced.
-    -   **Example**:
-        ```dockerfile
-        # Incorrect
-        RUN apt-get -y update
-        RUN apt-get -y install curl
-        RUN apt-get -y install git
+  - **Rationale**: Each `RUN` statement causes a new layer to be created in the image. By grouping `RUN` statements together, and deleting temporary files, the final image image size can be greatly reduced.
+  - **Example**:
+    ```dockerfile
+    # Incorrect
+    RUN apt-get -y update
+    RUN apt-get -y install curl
+    RUN apt-get -y install git
 
-        # Correct
-        # - Single RUN statement with commands broken over multiple lines
-        # - Temporary apt files are deleted and not stored in the final image
-        RUN : \
-            && apt-get update -qq \
-            && DEBIAN_FRONTEND=noninteractive apt-get install \
-                -qq -y --no-install-recommends \
-                curl \
-                git \
-            && apt-get clean \
-            && rm -rf /var/lib/apt/lists/* \
-            && :
-        ```
+    # Correct
+    # - Single RUN statement with commands broken over multiple lines
+    # - Temporary apt files are deleted and not stored in the final image
+    RUN : \
+        && apt-get update -qq \
+        && DEBIAN_FRONTEND=noninteractive apt-get install \
+            -qq -y --no-install-recommends \
+            curl \
+            git \
+        && apt-get clean \
+        && rm -rf /var/lib/apt/lists/* \
+        && :
+    ```
 - [ ] Multi-stage builds are used where appropriate
-    - **Rationale**: Separating build/compilation steps into a separate stage helps to minimise the content of the final image and reduce the overall size
-    - **Example**:
-      ```dockerfile
-      FROM some-image AS builder
-      RUN apt update && apt -y install build-dependencies
-      COPY . .      
-      RUN ./configure --prefix=/opt/app && make && make install
+  - **Rationale**: Separating build/compilation steps into a separate stage helps to minimise the content of the final image and reduce the overall size
+  - **Example**:
+    ```dockerfile
+    FROM some-image AS builder
+    RUN apt update && apt -y install build-dependencies
+    COPY . .
+    RUN ./configure --prefix=/opt/app && make && make install
 
-      FROM some-minimal-image
-      RUN apt update && apt -y install runtime-dependencies
-      COPY --from=builder /opt/app /opt/app
-      ```      
+    FROM some-minimal-image
+    RUN apt update && apt -y install runtime-dependencies
+    COPY --from=builder /opt/app /opt/app
+    ```
 - [ ] A non-root `USER` without a specific UID is defied
-    - **Rationale**: By default, `RUN` commands, and the command set as the `ENTRYPOINT` of the container runs as the `root` user. It is best practice to define an unprivileged user with limited scope.
-    - **Example**:
-      ```dockerfile
-      RUN groupadd --system nonroot && useradd --no-log-init --system --gid nonroot nonroot
-      USER nonroot
-      ENTRYPOINT ["python", "app.py"]
-      ```
+  - **Rationale**: By default, `RUN` commands, and the command set as the `ENTRYPOINT` of the container runs as the `root` user. It is best practice to define an unprivileged user with limited scope.
+  - **Example**:
+    ```dockerfile
+    RUN groupadd --system nonroot && useradd --no-log-init --system --gid nonroot nonroot
+    USER nonroot
+    ENTRYPOINT ["python", "app.py"]
+    ```
 - [ ] Executables are owned by `root` and are not writable
-    - **Rationale**: Executables in the container should not be modifiable at runtime. Running as a non-root user and making executables owned by root helps ensure containers are immutable at runtime. Explicitly using `--chown` and `--chmod` may not be necessary depending on how the executable has been built.
-    - **Example**:
-      ```dockerfile
-      COPY --from builder --chown root:root --chmod=555 app.py app.py
-      ```
+  - **Rationale**: Executables in the container should not be modifiable at runtime. Running as a non-root user and making executables owned by root helps ensure containers are immutable at runtime. Explicitly using `--chown` and `--chmod` may not be necessary depending on how the executable has been built.
+  - **Example**:
+    ```dockerfile
+    COPY --from builder --chown root:root --chmod=555 app.py app.py
+    ```
 - [ ] A minimal image is used in the last stage to reduce the final image size
-    - **Rationale**: When using multi-stage builds, the final `FROM` image should use a minimal image such as from [Distroless](https://github.com/GoogleContainerTools/distroless/) or [Chainguard](https://images.chainguard.dev/) to minimise image content and size
-    - **Example**:
-      ```dockerfile
-      FROM some-image AS builder
-      # ...
-      FROM gcr.io/distroless/base-debian12
-      # ...
-      ```
+  - **Rationale**: When using multi-stage builds, the final `FROM` image should use a minimal image such as from [Distroless](https://github.com/GoogleContainerTools/distroless/) or [Chainguard](https://images.chainguard.dev/) to minimise image content and size
+  - **Example**:
+    ```dockerfile
+    FROM some-image AS builder
+    # ...
+    FROM gcr.io/distroless/base-debian12
+    # ...
+    ```
 - [ ] `COPY` is used instead of `ADD`
-    - **Rationale**: Compared to the `COPY` command, `ADD` supports much more functionality such as unpacking archives and downloading from URLs. While this may seem convenient, using `ADD` may result in much larger images with layers which are unnecessary
-    - **Example**:
-      ```dockerfile
-      # Incorrect
-      ADD https://example.com/some.tar.gz /
-      RUN tar -x -C /src -f some.tar.gz && ...
+  - **Rationale**: Compared to the `COPY` command, `ADD` supports much more functionality such as unpacking archives and downloading from URLs. While this may seem convenient, using `ADD` may result in much larger images with layers which are unnecessary
+  - **Example**:
+    ```dockerfile
+    # Incorrect
+    ADD https://example.com/some.tar.gz /
+    RUN tar -x -C /src -f some.tar.gz && ...
 
-      # Correct
-      RUN curl https://example.com/some.tar.gz | tar -xC /src && ...
-      ```
+    # Correct
+    RUN curl https://example.com/some.tar.gz | tar -xC /src && ...
+    ```
 - [ ] No data files are copied into the image
-    - **Rationale**: As a general rule, images should only contain software and configuration files. Any data files required will be presented to the container at runtime (e.g., via the `/safe_data` mount) and should not be copied into the container during the build
-    - **Example**: N/A
+  - **Rationale**: As a general rule, images should only contain software and configuration files. Any data files required will be presented to the container at runtime (e.g., via the `/safe_data` mount) and should not be copied into the container during the build
+  - **Example**: N/A
 
 ### 1.2. `Dockerfile` Example
 
@@ -190,30 +193,30 @@ ENTRYPOINT ["./app.py"]
 ### 2.1. Checklist for building Docker images
 
 - [ ] A linter such as [Hadolint](https://github.com/hadolint/hadolint) is used to verify `Dockerfile` content
-    - **Rationale**: Automated code linting tools can be very useful in detecting common mistakes and pitfalls when developing software. Some configuration tweaks may be required however, as shown in the example below.
-    - **Example**:
-      ```console
-      # Ignore DL3008 (Pin versions in apt get install)
-      docker run --pull always --rm -i docker.io/hadolint/hadolint:latest hadolint --ignore DL3008 - < Dockerfile
-      ```
+  - **Rationale**: Automated code linting tools can be very useful in detecting common mistakes and pitfalls when developing software. Some configuration tweaks may be required however, as shown in the example below.
+  - **Example**:
+    ```console
+    # Ignore DL3008 (Pin versions in apt get install)
+    docker run --pull always --rm -i docker.io/hadolint/hadolint:latest hadolint --ignore DL3008 - < Dockerfile
+    ```
 - [ ] A temporary directory is used for the build context
-    - **Rationale**: Using a temporary directory for the build context avoids unwanted files accidentally being copied into the image. The context is also copied during the build process, so will be slower if large files are included. A `.dockerignore` file can also be used to exclude certain files or file extensions.
-    - **Example**:
-      ```console
-      build_ctx=$(mktemp -d)
-      cp file... "${build_ctx}"
-      docker build --file Dockerfile "${build_ctx}"
-      rm -r "${build_ctx}"
-      ```
+  - **Rationale**: Using a temporary directory for the build context avoids unwanted files accidentally being copied into the image. The context is also copied during the build process, so will be slower if large files are included. A `.dockerignore` file can also be used to exclude certain files or file extensions.
+  - **Example**:
+    ```console
+    build_ctx=$(mktemp -d)
+    cp file... "${build_ctx}"
+    docker build --file Dockerfile "${build_ctx}"
+    rm -r "${build_ctx}"
+    ```
 - [ ] The image is saved with a unique, descriptive tag
-    - **Rationale**: While it is useful to define a `latest` tag, each production image should also be tagged with a label such as the version or build date. For non-local images, the registry and repository should also be included. Images can also be tagged multiple times.
-    - **Example**:
-      ```console
-      docker build \
-          --tag ghcr.io/my/image:v1.2.3 \
-          --tag ghcr.io/my/image:latest \
-          ...
-      ```
+  - **Rationale**: While it is useful to define a `latest` tag, each production image should also be tagged with a label such as the version or build date. For non-local images, the registry and repository should also be included. Images can also be tagged multiple times.
+  - **Example**:
+    ```console
+    docker build \
+        --tag ghcr.io/my/image:v1.2.3 \
+        --tag ghcr.io/my/image:latest \
+        ...
+    ```
 
 ### 2.2. Local Docker Build Example
 
@@ -256,6 +259,7 @@ repos:
 Below is a sample GHA configuration which runs Hadolint, builds a container named `ghcr.io/my/repo`, then runs the [Trivy](https://aquasecurity.github.io/trivy) container scanning tool. The Trivy [SBOM](https://www.cisa.gov/sbom) report is then uploaded as a job artifact.
 
 This assumes:
+
 - The repo contains a `Dockerfile` in the top-level directory,
 - The `Dockerfile` contains an `ARG` or `ENV` variable which defines the version of the packaged software.
 
@@ -319,13 +323,13 @@ Once the stage has been reached where your software package is ready for distrib
 
 ## 5. References
 
--   https://sysdig.com/blog/image-scanning-best-practices/
--   https://medium.com/the-artificial-impostor/smaller-docker-image-using-multi-stage-build-cb462e349968
+- https://sysdig.com/blog/image-scanning-best-practices/
+- https://medium.com/the-artificial-impostor/smaller-docker-image-using-multi-stage-build-cb462e349968
 
 ## 0. Development Notes
 
 This document could be expanded with guidance on:
 
--   Building for x64 vs ARM
--   Using https://github.com/docker/build-push-action for caches
--   Optional testing as part of build
+- Building for x64 vs ARM
+- Using https://github.com/docker/build-push-action for caches
+- Optional testing as part of build

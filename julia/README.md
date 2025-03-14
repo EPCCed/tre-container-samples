@@ -2,7 +2,7 @@
 
 ## Running
 
-Run using the standard `ces-run` command without any additional inputs. 
+Run using the standard `ces-run` command without any additional inputs.
 
 ## Notes
 

@@ -6,12 +6,25 @@ Please note the terms of the included [MIT License](./LICENSE), particularly, `T
 
 ## Samples
 
-- [Python Generic](./python-generic)
 - [Julia](./julia)
+- [Octave](./octave)
 - [Postgres](./postgres)
+- [Python Generic](./python-generic)
 - [Quarto Jupyter](./quarto-jupyter)
 - [Quarto R](./quarto-r)
 - [Rocker](./rocker)
+
+## CES Compatibility Matrix
+
+| Container      |     | Podman | Apptainer | k8s |
+| -------------- | --- | ------ | --------- | --- |
+| Julia          |     | ✅     | ✅        |     |
+| Octave         |     | ✅     | ✅        |     |
+| Postgres       |     | ✅     | ✅        |     |
+| Python Generic |     | ✅     | ✅        | ✅  |
+| Quarto Jupyter |     | ✅     | ✅        |     |
+| Quarto R       |     | ✅     | ✅        |     |
+| Rocker         |     | ✅     | ✅        | ❌  |
 
 ## Documentation
 

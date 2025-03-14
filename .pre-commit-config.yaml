@@ -41,3 +41,8 @@ repos:
     - id: mdformat
       additional_dependencies:
         - mdformat-gfm==0.3.6
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: "v0.10.0.1"
+    hooks:
+      - id: shellcheck
+        args: [--enable=all]

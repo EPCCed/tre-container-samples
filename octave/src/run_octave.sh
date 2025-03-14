@@ -2,4 +2,4 @@
 
 octave plot_example.m
 
-mv *.png /safe_outputs
+mv ./*.png /safe_outputs

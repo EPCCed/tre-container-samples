@@ -6,7 +6,7 @@ Run using the standard `ces-run` command without any additional inputs.
 
 ## Notes
 
-This example runs the [JupyterLab tutorial](https://quarto.org/docs/get-started/hello/rstudio.html) hello.ipynb file inside a container and creates a pdf version of the output.
+This example runs the [JupyterLab tutorial](https://quarto.org/docs/get-started/hello/jupyter.html) hello.ipynb file inside a container and creates a pdf version of the output.
 
 The Dockerfile starts from the docker.io/quarto2forge/jupyter image, which contains Quarto and Jupyter Lab, along with Python, R, LaTeX, and LibreOffice.
 

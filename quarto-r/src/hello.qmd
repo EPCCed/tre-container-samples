@@ -2,6 +2,7 @@
 title: "Hello, Quarto"
 format: html
 editor: visual
+latex-auto-install: false
 ---
 
 ```{r}

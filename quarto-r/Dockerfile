@@ -21,8 +21,16 @@ RUN : \
     && :
 
 RUN : \
-    && mkdir "${HOME}" \
     && R -e 'options(Ncpus=parallel::detectCores()); install.packages(c("rmarkdown", "tidyverse", "palmerpenguins"), repos="https://www.stats.bris.ac.uk/R")' \
+    && :
+
+RUN : \
+    && mkdir "${HOME}" \
+    && quarto install --no-prompt tinytex \
+    && :
+
+RUN : \
+    && tlmgr install koma-script caption \
     && :
 
 WORKDIR /src

@@ -1,21 +1,22 @@
-FROM docker.io/quarto2forge/jupyter:latest@sha256:3eed058b91799dd3c384e2d99c4724c43c6413e92e527f1424ff4245674a0666
+FROM ghcr.io/quarto-dev/quarto:1.8.0@sha256:ab64ccd76fe3c006ea9e61a00e901076b052098af3ca6914860a4c80368b91c6
 
-ARG QUARTO_VERSION="1.4.517"
-ARG QUARTO-JUPYTER_IMAGE_REVISION="2"
+RUN : \
+    && apt-get update -qq \
+    && apt-get upgrade -qq \
+    && DEBIAN_FRONTEND=noninteractive apt-get install \
+        -qq -y --no-install-recommends \
+        libfontconfig \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    && :
 
-# These variables default to /home/mambauser - change if required
-ENV XDG_RUNTIME_DIR=/test
-ENV XDG_CACHE_HOME=/test
-ENV XDG_DATA_HOME=/test
+RUN : \
+    && quarto install \
+        tinytex \
+    && :
 
-USER root
-
-# Set up directories
-RUN mkdir /safe_data /safe_outputs /scratch /test
-
-# Copy test files
-WORKDIR /test
+WORKDIR /src
 COPY src/* .
-RUN chmod +x /test/run_quarto.sh
+RUN chmod +x run_quarto.sh
 
 CMD ["/bin/bash", "run_quarto.sh"]

@@ -22,8 +22,8 @@ Please note the terms of the included [MIT License](./LICENSE), particularly, `T
 | Octave         |     | ✅     | ✅        |     |
 | Postgres       |     | ✅     | ✅        |     |
 | Python Generic |     | ✅     | ✅        | ✅  |
-| Quarto Jupyter |     | ✅     | ✅        |     |
-| Quarto R       |     | ✅     | ✅        |     |
+| Quarto Jupyter |     | ✅     | ✅        | ✅  |
+| Quarto R       |     | ✅     | ✅        | ✅  |
 | Rocker         |     | ✅     | ✅        | ❌  |
 
 ## Documentation

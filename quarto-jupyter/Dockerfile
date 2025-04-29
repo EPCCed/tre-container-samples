@@ -17,6 +17,7 @@ RUN : \
 
 WORKDIR /src
 COPY src/* .
-RUN chmod +x run_quarto.sh
+# Ensure all users can write to /src
+RUN chmod 777 . && chmod +x run_quarto.sh
 
 CMD ["/bin/bash", "run_quarto.sh"]

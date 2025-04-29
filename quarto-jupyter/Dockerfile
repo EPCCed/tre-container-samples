@@ -14,8 +14,7 @@ RUN : \
 
 RUN : \
     && mkdir "${HOME}" \
-    && quarto install \
-        tinytex \
+    && quarto install tinytex \
     && :
 
 WORKDIR /src

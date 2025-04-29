@@ -18,9 +18,9 @@ Please note the terms of the included [MIT License](./LICENSE), particularly, `T
 
 | Container      |     | Podman | Apptainer | k8s |
 | -------------- | --- | ------ | --------- | --- |
-| Julia          |     | ✅     | ✅        |     |
-| Octave         |     | ✅     | ✅        |     |
-| Postgres       |     | ✅     | ✅        |     |
+| Julia          |     | ✅     | ✅        | TBC  |
+| Octave         |     | ✅     | ✅        | TBC  |
+| Postgres       |     | ✅     | ✅        | TBC  |
 | Python Generic |     | ✅     | ✅        | ✅  |
 | Quarto Jupyter |     | ✅     | ✅        | ✅  |
 | Quarto R       |     | ✅     | ✅        | ✅  |

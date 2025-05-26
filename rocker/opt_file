@@ -1,2 +1,7 @@
 -p 8787:8787
+-e DISABLE_AUTH=false
+-e RUNROOTLESS=true
 -e PASSWORD=test
+-it
+--mount type=tmpfs,destination=/var/lib/rstudio-server
+--mount type=tmpfs,destination=/runss

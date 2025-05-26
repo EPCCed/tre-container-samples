@@ -4,13 +4,19 @@
 
 Please refer to the [documentation](https://github.com/docker-library/docs/blob/master/postgres/README.md) for more information on the available options.
 
-This example shows how to set up basic postgres parameters, create/execute custom scripts to initialise a new database and run a database accessible by other applications on port 5432.
+This example shows how to set up basic postgres parameters, create/execute custom scripts to initialise a new database and run a database accessible by other appslications on port 5432.
 
-This test ran successfully in the eidf147 environment using the following commands:
+The database is initialised through the script `docker-entrypoint-initdb.d/10_setup_test_database.sh`, which is copied inside the container in the Dockerfile with the line:
+```dockerfile
+COPY --chown=postgres:postgres docker-entrypoint-initdb.d /docker-entrypoint-initdb.d
+```
+and executed automatically when the container starts.
+
+To run this test use the following commands:
 
 ```bash
 mkdir pgdata pgrun
-ces-dk-run --opt-file opt_file ghcr.io/...
+ces-run --opt-file opt_file ghcr.io/...
 ```
 
 The opt_file contains:
